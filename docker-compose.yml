@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  user-auth-service:
+    build: ./user-auth-service
+    container_name: user-auth-service
+    ports:
+      - "5001:5000" 
+    environment:
+      - NODE_ENV=production
+      - JWT_SECRET=mysecret 
+      - DATABASE_URL=mongodb://mongodb:27017/userauth
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - mongodb
+      - redis
+
+  event-management-service:
+    build: ./event-management-service
+    container_name: event-management-service
+    ports:
+      - "5002:5000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=mongodb://mongodb:27017/eventmanagement
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - mongodb
+      - redis
+
+  participant-management-service:
+    build: ./participant-management-service
+    container_name: participant-management-service
+    ports:
+      - "5003:5000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=mongodb://mongodb:27017/participantmanagement
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - mongodb
+      - redis
+
+  user-search-service:
+    build: ./user-search-service
+    container_name: user-search-service
+    ports:
+      - "5004:5000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=mongodb://mongodb:27017/usersearch
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - mongodb
+      - redis
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  mongo_data:
+  redis_data:
