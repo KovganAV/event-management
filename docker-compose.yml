@@ -5,58 +5,66 @@ services:
     build: ./user-auth-service
     container_name: user-auth-service
     ports:
-      - "5001:5000" 
+      - "5001:3000"
     environment:
       - NODE_ENV=production
-      - JWT_SECRET=mysecret 
+      - JWT_SECRET=mysecret
       - DATABASE_URL=mongodb://mongodb:27017/userauth
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     depends_on:
-      - mongodb
-      - redis
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   event-management-service:
     build: ./event-management-service
     container_name: event-management-service
     ports:
-      - "5002:5000"
+      - "5002:3001"
     environment:
       - NODE_ENV=production
       - DATABASE_URL=mongodb://mongodb:27017/eventmanagement
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     depends_on:
-      - mongodb
-      - redis
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   participant-management-service:
     build: ./participant-management-service
     container_name: participant-management-service
     ports:
-      - "5003:5000"
+      - "5003:3002"
     environment:
       - NODE_ENV=production
       - DATABASE_URL=mongodb://mongodb:27017/participantmanagement
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     depends_on:
-      - mongodb
-      - redis
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   user-search-service:
     build: ./user-search-service
     container_name: user-search-service
     ports:
-      - "5004:5000"
+      - "5004:3003"
     environment:
       - NODE_ENV=production
       - DATABASE_URL=mongodb://mongodb:27017/usersearch
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     depends_on:
-      - mongodb
-      - redis
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   mongodb:
     image: mongo:latest
@@ -65,6 +73,11 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ ping: 1 })"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
 
   redis:
     image: redis:latest
